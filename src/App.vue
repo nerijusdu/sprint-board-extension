@@ -1,17 +1,19 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+import azureService from './services/azureService';
 
 export default {
   name: 'app',
-  components: {
-    HelloWorld,
+  async mounted() {
+    const team = 'Run Team';
+    // const res = await azureService.getCurrentIteration(team);
+    // const items = await azureService.getIterationWorkItems(team, res.id);
+    console.log(items);
   },
 };
 </script>

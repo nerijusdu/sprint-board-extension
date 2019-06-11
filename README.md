@@ -5,6 +5,16 @@
 npm install
 ```
 
+config.secret.json structure:
+```
+{
+  "company": "my company name",
+  "project": "my project name",
+  "azureUsername": "my user name",
+  "azureToken": "my personal access token"
+}
+```
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve
