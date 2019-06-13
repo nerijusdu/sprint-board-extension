@@ -8,10 +8,13 @@ npm install
 config.secret.json structure:
 ```
 {
+  "url": "https://custom.board.local",
   "company": "my company name",
   "project": "my project name",
   "azureUsername": "my user name",
-  "azureToken": "my personal access token"
+  "azureToken": "my personal access token",
+  "clientId": "app id",
+  "appSecret": "app client secret"
 }
 ```
 

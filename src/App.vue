@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <img alt="Vue logo" src="./assets/logo.png">
+    <a :href="authUrl">Auth</a>
   </div>
 </template>
 
@@ -9,12 +10,15 @@ import azureService from './services/azureService';
 
 export default {
   name: 'app',
+  data: () => ({
+    authUrl: azureService.authUrl
+  }),
   async mounted() {
-    const team = 'Run Team';
+    // const team = 'Run Team';
     // const res = await azureService.getCurrentIteration(team);
     // const items = await azureService.getIterationWorkItems(team, res.id);
-    console.log(items);
-  },
+    // console.log(items);
+  }
 };
 </script>
 
