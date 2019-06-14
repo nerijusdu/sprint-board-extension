@@ -7,6 +7,7 @@
 
 <script>
 import azureService from './services/azureService';
+import boardService from './services/boardService';
 
 export default {
   name: 'app',
@@ -14,10 +15,12 @@ export default {
     authUrl: azureService.authUrl
   }),
   async mounted() {
-    // const team = 'Run Team';
-    // const res = await azureService.getCurrentIteration(team);
-    // const items = await azureService.getIterationWorkItems(team, res.id);
-    // console.log(items);
+    const team = 'Run Team';
+    const res = await azureService.getCurrentIteration(team);
+    const itemReferences = await azureService.getIterationWorkItems(team, res.id);
+    const items = await azureService.getWorkItemDetails(itemReferences);
+    const groupedItems = boardService.groupWorkItems(items);
+    console.log(groupedItems);
   }
 };
 </script>

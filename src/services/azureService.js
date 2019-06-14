@@ -108,13 +108,68 @@ export class AzureService {
 
   async getIterationWorkItems(team, iterationId) {
     const result = await api.get({
-      url: `https://dev.azure.com/${this.organization}/${this.project}/${team}/_apis/work/teamsettings/iterations/${iterationId}/workitems`,
+      url: `https://dev.azure.com/${this.company}/${this.project}/${team}/_apis/work/teamsettings/iterations/${iterationId}/workitems`,
       params: {
         'api-version': '5.0-preview.1',
       },
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`
+      },
+      noAuth: true
     });
 
-    return result;
+    if (!result) {
+      return [];
+    }
+
+    return result.data.workItemRelations;
+  }
+
+  async getWorkItemDetails(itemReferences) {
+    const pbiIds = itemReferences
+      .filter(x => !x.rel)
+      .map(x => x.target.id)
+      .join();
+
+    const subtaskIds = itemReferences
+      .filter(x => !!x.rel)
+      .map(x => x.target.id)
+      .join();
+
+    const tasksResult = await api.get({
+      url: `https://dev.azure.com/${this.company}/${this.project}/_apis/wit/workitems`,
+      params: {
+        ids: pbiIds,
+        'api-version': this.apiVersion,
+      }
+    });
+
+    if (!tasksResult) {
+      return null;
+    }
+
+    const subtasksResult = await api.get({
+      url: `https://dev.azure.com/${this.company}/${this.project}/_apis/wit/workitems`,
+      params: {
+        ids: subtaskIds,
+        'api-version': this.apiVersion,
+      }
+    });
+
+    if (!subtasksResult) {
+      return null;
+    }
+
+    return tasksResult.data.value.map((task) => {
+      const subIds = itemReferences
+        .filter(x => x.source && x.source.id === task.id)
+        .map(x => x.target.id);
+
+      return {
+        ...task,
+        subtasks: subtasksResult.data.value.filter(x => subIds.includes(x.id))
+      };
+    });
   }
 
   async getCurrentIteration(team) {
@@ -123,7 +178,7 @@ export class AzureService {
       params: {
         $timeframe: 'current',
         'api-version': this.apiVersion,
-      },
+      }
     });
 
     if (!result) {
@@ -144,5 +199,5 @@ export class AzureService {
   }
 }
 
-const instance = new AzureService(secretConfig.company, secretConfig.organization);
+const instance = new AzureService(secretConfig.company, secretConfig.project);
 export default instance;
