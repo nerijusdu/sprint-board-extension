@@ -2,17 +2,20 @@
   <div id="app">
     <!-- <a :href="authUrl">Auth</a> -->
     <board />
+    <loader />
   </div>
 </template>
 
 <script>
 import azureService from './services/azureService';
 import Board from './components/Board.vue';
+import Loader from './components/Loader.vue';
 
 export default {
   name: 'app',
   components: {
-    Board
+    Board,
+    Loader
   },
   data: () => ({
     authUrl: azureService.authUrl,

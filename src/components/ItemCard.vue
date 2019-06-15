@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!!item" class="container">
+  <div v-if="!!item" class="card-container">
     <div :class="['sub-container', itemType]">
       <div class="title">
         <span class="task-number">{{ item.id }}</span>
@@ -49,7 +49,7 @@ export default {
 </script>
 
 <style scoped>
-.container {
+.card-container {
   border: 3px solid #e7e9eb;
   border-radius: 15px;
   margin: 10px;
@@ -58,7 +58,6 @@ export default {
   display: flex;
   align-self: flex-start;
   justify-self: flex-start;
-  max-width: 400px;
   text-align: justify;
 }
 
