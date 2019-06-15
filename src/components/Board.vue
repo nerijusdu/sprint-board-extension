@@ -20,41 +20,24 @@
 </template>
 
 <script>
-import boardService from '../services/boardService';
 import ItemCard from './ItemCard.vue';
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { setTimeout } from 'timers';
-
-const refreshTime = 15 * 60 * 1000;
 
 export default {
   components: {
     ItemCard
   },
-  data: () => ({
-    todoItems: [],
-    devItems: [],
-    codeReviewItems: [],
-    testingItems: []
-  }),
-  methods: {
-    ...mapActions(['addLoader', 'removeLoader']),
-    async reloadData() {
-      this.addLoader();
-      const items = await boardService.getBoardItems();
-
-      this.todoItems = items.todo;
-      this.devItems = items.dev;
-      this.codeReviewItems = items.codeReview;
-      this.testingItems = items.testing;
-
-      this.removeLoader();
-    }
+  computed: {
+    ...mapState({
+      todoItems: state => state.boardItems.todo,
+      devItems: state => state.boardItems.dev,
+      codeReviewItems: state => state.boardItems.codeReview,
+      testingItems: state => state.boardItems.testing,
+    })
   },
-  mounted() {
-    this.reloadData();
-
-    setTimeout(this.reloadData, refreshTime);
+  methods: {
+    ...mapActions(['addLoader', 'removeLoader', 'reloadBoardData'])
   }
 };
 </script>
