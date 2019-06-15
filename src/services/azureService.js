@@ -6,9 +6,10 @@ import secretConfig from '../config.secret.json';
 export class AzureService {
   static callbackUrl = `${secretConfig.url}/callback.html`;
 
-  constructor(company, project) {
+  constructor(company, project, team) {
     this.company = company;
     this.project = project;
+    this.team = team;
     this.apiVersion = '5.0';
     this.code = '';
     this.accessToken = '';
@@ -106,9 +107,9 @@ export class AzureService {
     this.saveTokenResponse(result);
   }
 
-  async getIterationWorkItems(team, iterationId) {
+  async getIterationWorkItems(iterationId) {
     const result = await api.get({
-      url: `https://dev.azure.com/${this.company}/${this.project}/${team}/_apis/work/teamsettings/iterations/${iterationId}/workitems`,
+      url: `https://dev.azure.com/${this.company}/${this.project}/${this.team}/_apis/work/teamsettings/iterations/${iterationId}/workitems`,
       params: {
         'api-version': '5.0-preview.1',
       },
@@ -172,9 +173,9 @@ export class AzureService {
     });
   }
 
-  async getCurrentIteration(team) {
+  async getCurrentIteration() {
     const result = await api.get({
-      url: `https://dev.azure.com/${this.company}/${this.project}/${team}/_apis/work/teamsettings/iterations`,
+      url: `https://dev.azure.com/${this.company}/${this.project}/${this.team}/_apis/work/teamsettings/iterations`,
       params: {
         $timeframe: 'current',
         'api-version': this.apiVersion,
@@ -199,5 +200,5 @@ export class AzureService {
   }
 }
 
-const instance = new AzureService(secretConfig.company, secretConfig.project);
+const instance = new AzureService(secretConfig.company, secretConfig.project, secretConfig.team);
 export default instance;

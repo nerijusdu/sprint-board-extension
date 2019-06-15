@@ -11,6 +11,7 @@ config.secret.json structure:
   "url": "https://custom.board.local",
   "company": "my company name",
   "project": "my project name",
+  "team": "my team name",
   "azureUsername": "my user name",
   "azureToken": "my personal access token",
   "clientId": "app id",
