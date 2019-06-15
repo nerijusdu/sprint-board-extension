@@ -1,26 +1,23 @@
 <template>
   <div id="app">
-    <!-- <a :href="authUrl">Auth</a> -->
-    <board />
+    <navigation />
+    <router-view />
     <loader />
   </div>
 </template>
 
 <script>
-import azureService from './services/azureService';
 import Board from './components/Board.vue';
 import Loader from './components/Loader.vue';
+import Navigation from './components/Navigation.vue';
 
 export default {
   name: 'app',
   components: {
     Board,
-    Loader
-  },
-  data: () => ({
-    authUrl: azureService.authUrl,
-    items: []
-  })
+    Loader,
+    Navigation
+  }
 };
 </script>
 
@@ -38,5 +35,6 @@ body, html {
   color: #2c3e50;
   background-color: #f9fbfc;
   display: flex;
+  flex-direction: column;
 }
 </style>
