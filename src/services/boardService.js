@@ -39,6 +39,9 @@ export default class BoardService {
     this.testingTitles = settings.testingTitles
       .split(',')
       .map(x => x.trim().toLowerCase());
+    this.doneTitles = settings.doneTitles
+      .split(',')
+      .map(x => x.trim().toLowerCase());
   }
 
   groupWorkItems(items) {
@@ -50,9 +53,18 @@ export default class BoardService {
           status: Status.Todo
         };
 
+        if (this.doneTitles.includes(task.fields['System.State'].toLowerCase())) {
+          newTask.status = Status.Done;
+          return newTask;
+        }
+
         const development = task.subtasks.find(x => this.devTitles.includes(x.fields['System.Title'].toLowerCase()));
         const codeReview = task.subtasks.find(x => this.codeReviewTitles.includes(x.fields['System.Title'].toLowerCase()));
         const testing = task.subtasks.find(x => this.testingTitles.includes(x.fields['System.Title'].toLowerCase()));
+
+        if (!development && !codeReview && !testing) {
+          return newTask;
+        }
 
         if (development) {
           if (development.fields['System.State'].toLowerCase() === 'done') {
@@ -64,7 +76,7 @@ export default class BoardService {
         if (codeReview && codeReview.fields['System.State'].toLowerCase() === 'done') {
           newTask.status = Status.Testing;
         }
-        if (testing && testing.fields['System.State'].toLowerCase() === 'done') {
+        if (!testing || testing.fields['System.State'].toLowerCase() === 'done') {
           newTask.status = Status.Done;
         }
 

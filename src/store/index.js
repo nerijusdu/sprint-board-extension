@@ -24,7 +24,8 @@ const state = {
     refreshTime: 15,
     devTitles: 'Development',
     codeReviewTitles: 'Code review',
-    testingTitles: 'Testing'
+    testingTitles: 'Testing',
+    doneTitles: 'Done'
   },
   message: {
     content: '',

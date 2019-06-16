@@ -56,7 +56,7 @@ export default {
   padding: 10px;
   background-color: white;
   display: flex;
-  align-self: flex-start;
+  align-self: stretch;
   justify-self: flex-start;
   text-align: justify;
 }

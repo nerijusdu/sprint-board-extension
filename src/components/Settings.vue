@@ -97,6 +97,19 @@
           />
           <span class="focus-input"/>
         </div>
+        <div class="form-field">
+          <label class="label-input" for="doneTitles">
+            Done state
+          </label>
+          <input
+            v-model="model.doneTitles"
+            id="doneTitles"
+            class="input"
+            type="text"
+            required
+          />
+          <span class="focus-input"/>
+        </div>
       </div>
     </div>
     <button class="save-button">Save</button>
@@ -117,6 +130,7 @@ export default {
       devTitles: '',
       codeReviewTitles: '',
       testingTitles: '',
+      doneTitles: ''
     }
   }),
   computed: {
@@ -160,6 +174,7 @@ export default {
       this.model.devTitles = value.devTitles;
       this.model.codeReviewTitles = value.codeReviewTitles;
       this.model.testingTitles = value.testingTitles;
+      this.model.doneTitles = value.doneTitles;
     }
   },
   mounted() {
