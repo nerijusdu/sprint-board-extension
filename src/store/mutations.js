@@ -6,5 +6,8 @@ export default {
   },
   updateBoardItems(state, data) {
     state.boardItems = data;
+  },
+  updateSettings(state, data) {
+    state.settings = data;
   }
 };

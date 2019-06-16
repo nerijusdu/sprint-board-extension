@@ -1,12 +1,12 @@
 <template>
-  <div class="settings-container">
+  <form class="settings-container" @submit="save">
     <div class="settings-sub-container">
       <div class="settings-column">
         <h3 class="column-title">Azure DevOps settings</h3>
         <div class="form-field">
           <label class="label-input" for="organization">Organization</label>
           <input
-            v-model="model.organization"
+            v-model="settings.organization"
             id="organization"
             class="input"
             type="text"
@@ -17,7 +17,7 @@
         <div class="form-field">
           <label class="label-input" for="project">Project</label>
           <input
-            v-model="model.project"
+            v-model="settings.project"
             id="project"
             class="input"
             type="text"
@@ -28,7 +28,7 @@
         <div class="form-field">
           <label class="label-input" for="team">Team</label>
           <input
-            v-model="model.team"
+            v-model="settings.team"
             id="team"
             class="input"
             type="text"
@@ -42,7 +42,7 @@
         <div class="form-field">
           <label class="label-input" for="refreshTime">Refresh every X minutes</label>
           <input
-            v-model="model.refreshTime"
+            v-model="settings.refreshTime"
             id="refreshTime"
             class="input"
             type="number"
@@ -55,7 +55,7 @@
             Development subtask titles
           </label>
           <input
-            v-model="model.devTitles"
+            v-model="settings.devTitles"
             id="devTitles"
             class="input"
             type="text"
@@ -68,7 +68,7 @@
             Code review subtask titles
           </label>
           <input
-            v-model="model.codeReviewTitles"
+            v-model="settings.codeReviewTitles"
             id="codeReviewTitles"
             class="input"
             type="text"
@@ -79,21 +79,42 @@
       </div>
     </div>
     <button class="save-button">Save</button>
-  </div>
+  </form>
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
+
 export default {
-  data: () => ({
-    model: {
-      organization: '',
-      project: '',
-      team: '',
-      refreshTime: 0,
-      devTitles: '',
-      codeReviewTitles: ''
+  computed: mapState(['settings']),
+  methods: {
+    ...mapActions(['saveSettings']),
+    save(e) {
+      e.preventDefault();
+
+      if (this.settings.organization
+        && this.settings.project
+        && this.settings.team
+        && this.settings.refreshTime >= 0
+        && this.settings.devTitles
+        && this.settings.codeReviewTitles
+      ) {
+        this.saveSettings({
+          organization: this.settings.organization,
+          project: this.settings.project,
+          team: this.settings.team,
+          refreshTime: this.settings.refreshTime,
+          devTitles: this.settings.devTitles,
+          codeReviewTitles: this.settings.codeReviewTitles
+        });
+        // TODO: show success message
+        return false;
+      }
+
+      return false;
+      // TODO: show error message
     }
-  })
+  }
 };
 </script>
 
@@ -239,8 +260,8 @@ textarea:-ms-input-placeholder { color: #adadad;}
 
 input[type=number]::-webkit-inner-spin-button, 
 input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 input[type=number] {

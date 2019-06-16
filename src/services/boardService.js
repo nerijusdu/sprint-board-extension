@@ -1,8 +1,6 @@
-import azureService from './azureService';
+import AzureService from './azureService';
 
 const ignoreStatuses = ['Done', 'DevDone'];
-const devTitles = ['Development', 'Implementation', 'Fix'].map(x => x.toLowerCase());
-const codeReviewTitles = ['Code review', 'Review'].map(x => x.toLowerCase());
 
 export const Status = {
   Todo: 0,
@@ -11,7 +9,33 @@ export const Status = {
   Testing: 3
 };
 
-class BoardService {
+export default class BoardService {
+  constructor(storeObj) {
+    this.azureService = null;
+
+    storeObj.subscribe((mutation, state) => {
+      if (mutation.type === 'updateSettings') {
+        this.onSettingsUpdated(state.settings);
+        storeObj.dispatch('reloadBoardData');
+      }
+    });
+  }
+
+  onSettingsUpdated(settings) {
+    this.azureService = new AzureService(
+      settings.organization,
+      settings.project,
+      settings.team
+    );
+
+    this.devTitles = settings.devTitles
+      .split(',')
+      .map(x => x.trim().toLowerCase());
+    this.codeReviewTitles = settings.codeReviewTitles
+      .split(',')
+      .map(x => x.trim().toLowerCase());
+  }
+
   groupWorkItems(items) {
     const group = items
       .filter(x => x.fields['System.WorkItemType'] !== 'Task' && !ignoreStatuses.includes(x.fields['System.State']))
@@ -21,8 +45,8 @@ class BoardService {
           status: Status.Todo
         };
 
-        const development = task.subtasks.find(x => devTitles.includes(x.fields['System.Title'].toLowerCase()));
-        const codeReview = task.subtasks.find(x => codeReviewTitles.includes(x.fields['System.Title'].toLowerCase()));
+        const development = task.subtasks.find(x => this.devTitles.includes(x.fields['System.Title'].toLowerCase()));
+        const codeReview = task.subtasks.find(x => this.codeReviewTitles.includes(x.fields['System.Title'].toLowerCase()));
 
         if (development) {
           if (development.fields['System.State'].toLowerCase() === 'done') {
@@ -42,19 +66,26 @@ class BoardService {
   }
 
   async getBoardItems() {
-    const iteration = await azureService.getCurrentIteration();
-    const itemReferences = await azureService.getIterationWorkItems(iteration.id);
-    const items = await azureService.getWorkItemDetails(itemReferences);
-    const groupedItems = this.groupWorkItems(items);
+    try {
+      const iteration = await this.azureService.getCurrentIteration();
+      const itemReferences = await this.azureService.getIterationWorkItems(iteration.id);
+      const items = await this.azureService.getWorkItemDetails(itemReferences);
+      const groupedItems = this.groupWorkItems(items);
 
-    return {
-      todo: groupedItems.filter(x => x.status === Status.Todo),
-      dev: groupedItems.filter(x => x.status === Status.Development),
-      codeReview: groupedItems.filter(x => x.status === Status.CodeReview),
-      testing: groupedItems.filter(x => x.status === Status.Testing)
-    };
+      return {
+        todo: groupedItems.filter(x => x.status === Status.Todo),
+        dev: groupedItems.filter(x => x.status === Status.Development),
+        codeReview: groupedItems.filter(x => x.status === Status.CodeReview),
+        testing: groupedItems.filter(x => x.status === Status.Testing)
+      };
+    } catch (e) {
+      // TODO: show error
+      return {
+        todo: [],
+        dev: [],
+        codeReview: [],
+        testing: []
+      };
+    }
   }
 }
-
-const instance = new BoardService();
-export default instance;
