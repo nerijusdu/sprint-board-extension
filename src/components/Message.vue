@@ -30,7 +30,7 @@ export default {
   watch: {
     content(value) {
       if (value) {
-        setTimeout(this.hide, hideAfter)
+        setTimeout(this.hide, hideAfter);
       }
     }
   }

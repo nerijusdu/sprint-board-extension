@@ -138,7 +138,7 @@ export default {
         && this.model.testingTitles
       ) {
         this.saveSettings(this.model);
-        
+
         return false;
       }
 
@@ -153,13 +153,13 @@ export default {
   },
   watch: {
     settings(value) {
-      this.model.organization = this.settings.organization;
-      this.model.project = this.settings.project;
-      this.model.team = this.settings.team;
-      this.model.refreshTime = this.settings.refreshTime;
-      this.model.devTitles = this.settings.devTitles;
-      this.model.codeReviewTitles = this.settings.codeReviewTitles;
-      this.model.testingTitles = this.settings.testingTitles;
+      this.model.organization = value.organization;
+      this.model.project = value.project;
+      this.model.team = value.team;
+      this.model.refreshTime = value.refreshTime;
+      this.model.devTitles = value.devTitles;
+      this.model.codeReviewTitles = value.codeReviewTitles;
+      this.model.testingTitles = value.testingTitles;
     }
   }
 };
