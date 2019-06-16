@@ -25,6 +25,10 @@ const state = {
     devTitles: 'Development',
     codeReviewTitles: 'Code review',
     testingTitles: 'Testing'
+  },
+  message: {
+    content: '',
+    isError: false
   }
 };
 

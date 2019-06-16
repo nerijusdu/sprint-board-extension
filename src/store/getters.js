@@ -3,5 +3,6 @@ export default {
   hasAzureSettings: state => !!state.settings
     && !!state.settings.organization
     && !!state.settings.project
-    && !!state.settings.team
+    && !!state.settings.team,
+  hasMessage: state => !!state.message.content
 };

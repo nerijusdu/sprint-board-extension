@@ -1,5 +1,4 @@
 import AzureService from './azureService';
-import mockData from '../mockData.json';
 
 export const Status = {
   Todo: 0,
@@ -12,6 +11,7 @@ export const Status = {
 export default class BoardService {
   constructor(storeObj) {
     this.azureService = null;
+    this.error = content => storeObj.dispatch('showError', content);
 
     storeObj.subscribe((mutation, state) => {
       if (mutation.type === 'updateSettings') {
@@ -74,14 +74,12 @@ export default class BoardService {
   }
 
   async getBoardItems() {
-    console.log('updating items');
     try {
-      // const iteration = await this.azureService.getCurrentIteration();
-      // const itemReferences = await this.azureService.getIterationWorkItems(iteration.id);
-      // const items = await this.azureService.getWorkItemDetails(itemReferences);
-      // const groupedItems = this.groupWorkItems(items);
+      const iteration = await this.azureService.getCurrentIteration();
+      const itemReferences = await this.azureService.getIterationWorkItems(iteration.id);
+      const items = await this.azureService.getWorkItemDetails(itemReferences);
+      const groupedItems = this.groupWorkItems(items);
 
-      const groupedItems = mockData;
       return {
         todo: groupedItems.filter(x => x.status === Status.Todo),
         dev: groupedItems.filter(x => x.status === Status.Development),
@@ -90,7 +88,8 @@ export default class BoardService {
         done: groupedItems.filter(x => x.status === Status.Done)
       };
     } catch (e) {
-      // TODO: show error
+      this.error('Error while fetching data.');
+
       return {
         todo: [],
         dev: [],

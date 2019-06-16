@@ -106,7 +106,7 @@ export default {
   }),
   computed: mapState(['settings', 'isAccessGranted']),
   methods: {
-    ...mapActions(['saveSettings']),
+    ...mapActions(['saveSettings', 'showError']),
     save(e) {
       e.preventDefault();
 
@@ -127,12 +127,12 @@ export default {
           codeReviewTitles: this.settings.codeReviewTitles,
           testingTitles: this.settings.testingTitles
         });
-        // TODO: show success message
+        
         return false;
       }
 
+      this.showError('Please enter valid values into required fields.');
       return false;
-      // TODO: show error message
     }
   }
 };

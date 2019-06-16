@@ -28,9 +28,10 @@ export default {
     setTimeout(() => context.dispatch('reloadBoardData'), context.state.settings.refreshTime * 60 * 1000);
     context.dispatch('removeLoader');
   },
-  saveSettings({ commit }, settings) {
+  saveSettings({ commit, dispatch }, settings) {
     window.localStorage.setItem('settings', JSON.stringify(settings));
     commit('updateSettings', settings);
+    dispatch('showMessage', 'Settings saved successfuly.');
   },
   loadSettingsFromMemory({ commit }) {
     const settingsStr = window.localStorage.getItem('settings');
@@ -39,6 +40,19 @@ export default {
     }
   },
   authorizeApp({ commit }) {
+    window.localStorage.setItem('appAuthorized', 'true');
     commit('authorizeApp');
+  },
+  showError({ commit }, content) {
+    commit('updateMessage', {
+      content,
+      isError: true
+    });
+  },
+  showMessage({ commit }, content) {
+    commit('updateMessage', {
+      content,
+      isError: false
+    });
   }
 };

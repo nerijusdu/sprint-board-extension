@@ -184,7 +184,6 @@ export default class AzureService {
       },
       headers: this.authHeader
     });
-    console.log(result);
 
     if (!result) {
       return null;

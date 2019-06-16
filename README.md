@@ -5,17 +5,18 @@
 npm install
 ```
 
-config.secret.json structure:
+- Register app in [Azure DevOps](https://app.vsaex.visualstudio.com/app/register)
+  - Callback must be `{your app url}/callback.html`
+  - Minimum scopes required:
+    - Work items (read)
+    - Code (read) - currently not used, save for future
+    - Project and team (read) - currently not used, save for future
+- Add `src/config.secret.json` with the following structure:
 ```
 {
-  "url": "https://custom.board.local",
-  "company": "my company name",
-  "project": "my project name",
-  "team": "my team name",
-  "azureUsername": "my user name",
-  "azureToken": "my personal access token",
-  "clientId": "app id",
-  "appSecret": "app client secret"
+  "url": "App URL",
+  "clientId": "App ID",
+  "appSecret": "Client Secret"
 }
 ```
 

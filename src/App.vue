@@ -3,6 +3,7 @@
     <navigation />
     <router-view />
     <loader />
+    <message />
   </div>
 </template>
 
@@ -10,10 +11,12 @@
 import { mapActions } from 'vuex';
 import Loader from './components/Loader.vue';
 import Navigation from './components/Navigation.vue';
+import Message from './components/Message.vue';
 
 export default {
   name: 'app',
   components: {
+    Message,
     Loader,
     Navigation
   },
@@ -28,6 +31,7 @@ export default {
 body, html {
   margin: 0px;
   padding: 0px;
+  background-color: #f9fbfc;
 }
 
 #app {
@@ -36,7 +40,6 @@ body, html {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-color: #f9fbfc;
   display: flex;
   flex-direction: column;
 }

@@ -12,5 +12,8 @@ export default {
   },
   authorizeApp(state) {
     state.isAccessGranted = true;
+  },
+  updateMessage(state, data) {
+    state.message = data;
   }
 };
