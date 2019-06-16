@@ -6,7 +6,7 @@
         <div class="form-field">
           <label class="label-input" for="organization">Organization</label>
           <input
-            v-model="settings.organization"
+            v-model="model.organization"
             id="organization"
             class="input"
             type="text"
@@ -17,7 +17,7 @@
         <div class="form-field">
           <label class="label-input" for="project">Project</label>
           <input
-            v-model="settings.project"
+            v-model="model.project"
             id="project"
             class="input"
             type="text"
@@ -28,7 +28,7 @@
         <div class="form-field">
           <label class="label-input" for="team">Team</label>
           <input
-            v-model="settings.team"
+            v-model="model.team"
             id="team"
             class="input"
             type="text"
@@ -36,14 +36,21 @@
           />
           <span class="focus-input"/>
         </div>
-        <a :href="authUrl" class="authorize-link" v-if="!isAccessGranted">Authorize app</a>
+        <button
+          type="button"
+          :class="['authorize-link', { disabled: !hasAzureSettings }]"
+          @click="authorize"
+          v-if="!isAccessGranted"
+        >
+          Authorize app
+        </button>
       </div>
       <div class="settings-column">
         <h3 class="column-title">App settings</h3>
         <div class="form-field">
           <label class="label-input" for="refreshTime">Refresh every X minutes</label>
           <input
-            v-model="settings.refreshTime"
+            v-model="model.refreshTime"
             id="refreshTime"
             class="input"
             type="number"
@@ -56,7 +63,7 @@
             Development subtask titles
           </label>
           <input
-            v-model="settings.devTitles"
+            v-model="model.devTitles"
             id="devTitles"
             class="input"
             type="text"
@@ -69,7 +76,7 @@
             Code review subtask titles
           </label>
           <input
-            v-model="settings.codeReviewTitles"
+            v-model="model.codeReviewTitles"
             id="codeReviewTitles"
             class="input"
             type="text"
@@ -82,7 +89,7 @@
             Testing subtask titles
           </label>
           <input
-            v-model="settings.testingTitles"
+            v-model="model.testingTitles"
             id="testingTitles"
             class="input"
             type="text"
@@ -97,42 +104,62 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapGetters } from 'vuex';
 import AzureService from '../services/azureService';
 
 export default {
   data: () => ({
-    authUrl: AzureService.authUrl
+    authUrl: AzureService.authUrl,
+    model: {
+      organization: '',
+      project: '',
+      team: '',
+      refreshTime: '',
+      devTitles: '',
+      codeReviewTitles: '',
+      testingTitles: '',
+    }
   }),
-  computed: mapState(['settings', 'isAccessGranted']),
+  computed: {
+    ...mapState(['settings', 'isAccessGranted']),
+    ...mapGetters(['hasAzureSettings'])
+  },
   methods: {
     ...mapActions(['saveSettings', 'showError']),
     save(e) {
       e.preventDefault();
 
-      if (this.settings.organization
-        && this.settings.project
-        && this.settings.team
-        && this.settings.refreshTime >= 0
-        && this.settings.devTitles
-        && this.settings.codeReviewTitles
-        && this.settings.testingTitles
+      if (this.model.organization
+        && this.model.project
+        && this.model.team
+        && this.model.refreshTime >= 0
+        && this.model.devTitles
+        && this.model.codeReviewTitles
+        && this.model.testingTitles
       ) {
-        this.saveSettings({
-          organization: this.settings.organization,
-          project: this.settings.project,
-          team: this.settings.team,
-          refreshTime: this.settings.refreshTime,
-          devTitles: this.settings.devTitles,
-          codeReviewTitles: this.settings.codeReviewTitles,
-          testingTitles: this.settings.testingTitles
-        });
+        this.saveSettings(this.model);
         
         return false;
       }
 
       this.showError('Please enter valid values into required fields.');
       return false;
+    },
+    authorize() {
+      if (!this.hasAzureSettings) {
+        this.showError('Save settings before authorizing.');
+      }
+    }
+  },
+  watch: {
+    settings(value) {
+      this.model.organization = this.settings.organization;
+      this.model.project = this.settings.project;
+      this.model.team = this.settings.team;
+      this.model.refreshTime = this.settings.refreshTime;
+      this.model.devTitles = this.settings.devTitles;
+      this.model.codeReviewTitles = this.settings.codeReviewTitles;
+      this.model.testingTitles = this.settings.testingTitles;
     }
   }
 };
@@ -179,13 +206,18 @@ export default {
   text-align: center;
   transition: all 0.2s;
   border: 1px solid #171c26;
-  cursor: pointer;
   color: #171c26;
 }
 
-.authorize-link:hover {
+.authorize-link:not(.disabled) {
+  background-color: #3b97ea;
+  color: white;
+}
+
+.authorize-link:hover:not(.disabled) {
   background-color: #171c26;
   color: white;
+  cursor: pointer;
 }
 
 /*---------------------------------------------*/
