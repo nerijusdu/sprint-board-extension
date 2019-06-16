@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+// eslint-disable-next-line import/no-cycle
 import actions from './actions';
 import mutations from './mutations';
 import getters from './getters';
@@ -12,7 +13,8 @@ const state = {
     todo: [],
     dev: [],
     codeReview: [],
-    testing: []
+    testing: [],
+    done: []
   },
   settings: {
     organization: '',
@@ -20,7 +22,8 @@ const state = {
     team: '',
     refreshTime: 15,
     devTitles: 'Development',
-    codeReviewTitles: 'Code review'
+    codeReviewTitles: 'Code review',
+    testingTitles: 'Testing'
   }
 };
 

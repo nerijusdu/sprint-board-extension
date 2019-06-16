@@ -76,6 +76,19 @@
           />
           <span class="focus-input"/>
         </div>
+        <div class="form-field">
+          <label class="label-input" for="testingTitles">
+            Testing subtask titles
+          </label>
+          <input
+            v-model="settings.testingTitles"
+            id="testingTitles"
+            class="input"
+            type="text"
+            required
+          />
+          <span class="focus-input"/>
+        </div>
       </div>
     </div>
     <button class="save-button">Save</button>
@@ -98,6 +111,7 @@ export default {
         && this.settings.refreshTime >= 0
         && this.settings.devTitles
         && this.settings.codeReviewTitles
+        && this.settings.testingTitles
       ) {
         this.saveSettings({
           organization: this.settings.organization,
@@ -105,7 +119,8 @@ export default {
           team: this.settings.team,
           refreshTime: this.settings.refreshTime,
           devTitles: this.settings.devTitles,
-          codeReviewTitles: this.settings.codeReviewTitles
+          codeReviewTitles: this.settings.codeReviewTitles,
+          testingTitles: this.settings.testingTitles
         });
         // TODO: show success message
         return false;
@@ -258,8 +273,8 @@ textarea:-moz-placeholder { color: #adadad;}
 textarea::-moz-placeholder { color: #adadad;}
 textarea:-ms-input-placeholder { color: #adadad;}
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }

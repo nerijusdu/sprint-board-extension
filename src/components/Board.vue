@@ -17,6 +17,10 @@
         <div class="column-title">Testing ({{ testingItems.length }})</div>
         <item-card v-for="item in testingItems" :key="item.id" :item="item"/>
       </div>
+      <div class="column">
+        <div class="column-title">Done ({{ doneItems.length }})</div>
+        <item-card v-for="item in doneItems" :key="item.id" :item="item"/>
+      </div>
     </div>
     <div v-if="!hasAzureSettings">
       <h2>Please add Azure DevOps configuration in the settings tab.</h2>
@@ -38,6 +42,7 @@ export default {
       devItems: state => state.boardItems.dev,
       codeReviewItems: state => state.boardItems.codeReview,
       testingItems: state => state.boardItems.testing,
+      doneItems: state => state.boardItems.done
     }),
     ...mapGetters(['hasAzureSettings'])
   },

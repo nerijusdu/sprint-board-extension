@@ -1,12 +1,11 @@
 import AzureService from './azureService';
 
-const ignoreStatuses = ['Done', 'DevDone'];
-
 export const Status = {
   Todo: 0,
   Development: 1,
   CodeReview: 2,
-  Testing: 3
+  Testing: 3,
+  Done: 4
 };
 
 export default class BoardService {
@@ -34,11 +33,14 @@ export default class BoardService {
     this.codeReviewTitles = settings.codeReviewTitles
       .split(',')
       .map(x => x.trim().toLowerCase());
+    this.testingTitles = settings.testingTitles
+      .split(',')
+      .map(x => x.trim().toLowerCase());
   }
 
   groupWorkItems(items) {
     const group = items
-      .filter(x => x.fields['System.WorkItemType'] !== 'Task' && !ignoreStatuses.includes(x.fields['System.State']))
+      .filter(x => x.fields['System.WorkItemType'] !== 'Task')
       .map((task) => {
         const newTask = {
           ...task,
@@ -47,6 +49,7 @@ export default class BoardService {
 
         const development = task.subtasks.find(x => this.devTitles.includes(x.fields['System.Title'].toLowerCase()));
         const codeReview = task.subtasks.find(x => this.codeReviewTitles.includes(x.fields['System.Title'].toLowerCase()));
+        const testing = task.subtasks.find(x => this.testingTitles.includes(x.fields['System.Title'].toLowerCase()));
 
         if (development) {
           if (development.fields['System.State'].toLowerCase() === 'done') {
@@ -57,6 +60,9 @@ export default class BoardService {
         }
         if (codeReview && codeReview.fields['System.State'].toLowerCase() === 'done') {
           newTask.status = Status.Testing;
+        }
+        if (testing && testing.fields['System.State'].toLowerCase() === 'done') {
+          newTask.status = Status.Done;
         }
 
         return newTask;
@@ -76,7 +82,8 @@ export default class BoardService {
         todo: groupedItems.filter(x => x.status === Status.Todo),
         dev: groupedItems.filter(x => x.status === Status.Development),
         codeReview: groupedItems.filter(x => x.status === Status.CodeReview),
-        testing: groupedItems.filter(x => x.status === Status.Testing)
+        testing: groupedItems.filter(x => x.status === Status.Testing),
+        done: groupedItems.filter(x => x.status === Status.Done)
       };
     } catch (e) {
       // TODO: show error
@@ -84,7 +91,8 @@ export default class BoardService {
         todo: [],
         dev: [],
         codeReview: [],
-        testing: []
+        testing: [],
+        done: []
       };
     }
   }

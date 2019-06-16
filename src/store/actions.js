@@ -23,9 +23,9 @@ export default {
     context.dispatch('addLoader');
 
     const result = await boardService.getBoardItems();
-    setTimeout(() => context.dispatch('reloadBoardData'), context.state.settings.refreshTime * 60 * 1000);
     context.commit('updateBoardItems', result);
 
+    setTimeout(() => context.dispatch('reloadBoardData'), context.state.settings.refreshTime * 60 * 1000);
     context.dispatch('removeLoader');
   },
   saveSettings({ commit }, settings) {
