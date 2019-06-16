@@ -1,4 +1,5 @@
 import AzureService from './azureService';
+import mockData from '../mockData.json';
 
 export const Status = {
   Todo: 0,
@@ -14,14 +15,15 @@ export default class BoardService {
 
     storeObj.subscribe((mutation, state) => {
       if (mutation.type === 'updateSettings') {
-        this.onSettingsUpdated(state.settings);
+        this.onSettingsUpdated(storeObj, state.settings);
         storeObj.dispatch('reloadBoardData');
       }
     });
   }
 
-  onSettingsUpdated(settings) {
+  onSettingsUpdated(store, settings) {
     this.azureService = new AzureService(
+      store,
       settings.organization,
       settings.project,
       settings.team
@@ -72,12 +74,14 @@ export default class BoardService {
   }
 
   async getBoardItems() {
+    console.log('updating items');
     try {
-      const iteration = await this.azureService.getCurrentIteration();
-      const itemReferences = await this.azureService.getIterationWorkItems(iteration.id);
-      const items = await this.azureService.getWorkItemDetails(itemReferences);
-      const groupedItems = this.groupWorkItems(items);
+      // const iteration = await this.azureService.getCurrentIteration();
+      // const itemReferences = await this.azureService.getIterationWorkItems(iteration.id);
+      // const items = await this.azureService.getWorkItemDetails(itemReferences);
+      // const groupedItems = this.groupWorkItems(items);
 
+      const groupedItems = mockData;
       return {
         todo: groupedItems.filter(x => x.status === Status.Todo),
         dev: groupedItems.filter(x => x.status === Status.Development),

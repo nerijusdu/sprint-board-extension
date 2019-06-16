@@ -16,7 +16,7 @@ export default {
     commit('updateLoading', -1);
   },
   async reloadBoardData(context) {
-    if (!context.getters.hasAzureSettings) {
+    if (!context.getters.hasAzureSettings || !context.state.isAccessGranted) {
       return;
     }
 
@@ -37,5 +37,8 @@ export default {
     if (settingsStr) {
       commit('updateSettings', JSON.parse(settingsStr));
     }
+  },
+  authorizeApp({ commit }) {
+    commit('authorizeApp');
   }
 };

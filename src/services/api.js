@@ -1,15 +1,9 @@
 import axios from 'axios';
-import secretConfig from '../config.secret.json';
 
 const handleRequest = (method, hasData) => async (userConfig) => {
   const config = userConfig || {};
   if (!config.headers) {
     config.headers = {};
-  }
-
-  if (!config.noAuth) {
-    const token = btoa(`${secretConfig.azureUsername}:${secretConfig.azureToken}`);
-    config.headers.Authorization = `Basic ${token}`;
   }
 
   try {
@@ -22,6 +16,13 @@ const handleRequest = (method, hasData) => async (userConfig) => {
 
     return res;
   } catch (e) {
+    if (e.response.status === 401 && window.localStorage.getItem('appAuthorized')) { // 401
+      window.localStorage.removeItem('appAuthorized');
+      window.localStorage.removeItem('accessToken');
+      window.localStorage.removeItem('refreshToken');
+      window.localStorage.removeItem('expiresIn');
+      document.location.href = '/settings';
+    }
     console.warn(e);
     return null;
   }

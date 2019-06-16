@@ -1,6 +1,6 @@
 <template>
   <div class="board-container">
-    <div class="board-sub-container" v-if="hasAzureSettings">
+    <div class="board-sub-container" v-if="hasAzureSettings && accessGranted">
       <div class="column">
         <div class="column-title">To Do ({{ todoItems.length }})</div>
         <item-card v-for="item in todoItems" :key="item.id" :item="item"/>
@@ -22,8 +22,10 @@
         <item-card v-for="item in doneItems" :key="item.id" :item="item"/>
       </div>
     </div>
-    <div v-if="!hasAzureSettings">
-      <h2>Please add Azure DevOps configuration in the settings tab.</h2>
+    <div v-if="!hasAzureSettings || !accessGranted">
+      <h2>
+        Please add Azure DevOps configuration in the settings tab and allow access for the app.
+      </h2>
     </div>
   </div>
 </template>
@@ -42,7 +44,8 @@ export default {
       devItems: state => state.boardItems.dev,
       codeReviewItems: state => state.boardItems.codeReview,
       testingItems: state => state.boardItems.testing,
-      doneItems: state => state.boardItems.done
+      doneItems: state => state.boardItems.done,
+      accessGranted: state => state.isAccessGranted
     }),
     ...mapGetters(['hasAzureSettings'])
   },

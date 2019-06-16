@@ -9,5 +9,8 @@ export default {
   },
   updateSettings(state, data) {
     state.settings = data;
+  },
+  authorizeApp(state) {
+    state.isAccessGranted = true;
   }
 };

@@ -6,7 +6,7 @@ import secretConfig from '../config.secret.json';
 export default class AzureService {
   static callbackUrl = `${secretConfig.url}/callback.html`;
 
-  constructor(organization, project, team) {
+  constructor(store, organization, project, team) {
     this.organization = organization;
     this.project = project;
     this.team = team;
@@ -15,6 +15,7 @@ export default class AzureService {
     this.accessToken = '';
     this.refreshToken = '';
     this.expiresIn = moment();
+    this.onAuthorized = () => store.dispatch('authorizeApp');
 
     this.initData();
   }
@@ -39,7 +40,7 @@ export default class AzureService {
     }
   }
 
-  get authUrl() {
+  static get authUrl() {
     const params = {
       client_id: secretConfig.clientId,
       response_type: 'Assertion',
@@ -48,6 +49,10 @@ export default class AzureService {
       redirect_uri: AzureService.callbackUrl,
     };
     return `https://app.vssps.visualstudio.com/oauth2/authorize?${qs.stringify(params)}`;
+  }
+
+  get authHeader() {
+    return { Authorization: `Bearer ${this.accessToken}` };
   }
 
   async refreshAccessToken() {
@@ -62,8 +67,7 @@ export default class AzureService {
         grant_type: 'refresh_token',
         assertion: this.refreshToken,
         redirect_uri: AzureService.callbackUrl
-      }),
-      noAuth: true
+      })
     });
 
     if (!result) {
@@ -77,7 +81,7 @@ export default class AzureService {
     const urlParams = new URLSearchParams(data);
     if (urlParams.has('code')) {
       this.code = urlParams.get('code');
-      window.localStorage.setItem('code', this.code);
+      this.onAuthorized();
     }
 
     await this.getAccessToken();
@@ -95,8 +99,7 @@ export default class AzureService {
         grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
         assertion: this.code,
         redirect_uri: AzureService.callbackUrl
-      }),
-      noAuth: true
+      })
     });
 
     if (!result) {
@@ -113,10 +116,7 @@ export default class AzureService {
       params: {
         'api-version': '5.0-preview.1',
       },
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`
-      },
-      noAuth: true
+      headers: this.authHeader
     });
 
     if (!result) {
@@ -142,7 +142,8 @@ export default class AzureService {
       params: {
         ids: pbiIds,
         'api-version': this.apiVersion,
-      }
+      },
+      headers: this.authHeader
     });
 
     if (!tasksResult) {
@@ -154,7 +155,8 @@ export default class AzureService {
       params: {
         ids: subtaskIds,
         'api-version': this.apiVersion,
-      }
+      },
+      headers: this.authHeader
     });
 
     if (!subtasksResult) {
@@ -179,8 +181,10 @@ export default class AzureService {
       params: {
         $timeframe: 'current',
         'api-version': this.apiVersion,
-      }
+      },
+      headers: this.authHeader
     });
+    console.log(result);
 
     if (!result) {
       return null;

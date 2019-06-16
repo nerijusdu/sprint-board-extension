@@ -8,6 +8,7 @@ import getters from './getters';
 Vue.use(Vuex);
 
 const state = {
+  isAccessGranted: window.localStorage.getItem('appAuthorized') === 'true',
   activeLoaders: 0,
   boardItems: {
     todo: [],

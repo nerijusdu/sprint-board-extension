@@ -36,6 +36,7 @@
           />
           <span class="focus-input"/>
         </div>
+        <a :href="authUrl" class="authorize-link" v-if="!isAccessGranted">Authorize app</a>
       </div>
       <div class="settings-column">
         <h3 class="column-title">App settings</h3>
@@ -97,9 +98,13 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
+import AzureService from '../services/azureService';
 
 export default {
-  computed: mapState(['settings']),
+  data: () => ({
+    authUrl: AzureService.authUrl
+  }),
+  computed: mapState(['settings', 'isAccessGranted']),
   methods: {
     ...mapActions(['saveSettings']),
     save(e) {
@@ -151,7 +156,7 @@ export default {
   padding: 5px 20px;
   border: none;
   box-sizing: border-box;
-  text-decoration:none;
+  text-decoration: none;
   font-weight: bold;
   text-align: center;
   transition: all 0.2s;
@@ -162,7 +167,25 @@ export default {
 
 .save-button:hover {
   background-color: #171c26;
+}
+
+.authorize-link {
+  display:inline-block;
+  padding: 5px 20px;
+  border: none;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.2s;
+  border: 1px solid #171c26;
   cursor: pointer;
+  color: #171c26;
+}
+
+.authorize-link:hover {
+  background-color: #171c26;
+  color: white;
 }
 
 /*---------------------------------------------*/
