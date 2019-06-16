@@ -8,14 +8,12 @@
 
 <script>
 import { mapActions } from 'vuex';
-import Board from './components/Board.vue';
 import Loader from './components/Loader.vue';
 import Navigation from './components/Navigation.vue';
 
 export default {
   name: 'app',
   components: {
-    Board,
     Loader,
     Navigation
   },

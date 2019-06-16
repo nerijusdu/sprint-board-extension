@@ -20,9 +20,8 @@
 </template>
 
 <script>
-import ItemCard from './ItemCard.vue';
 import { mapActions, mapState } from 'vuex';
-import { setTimeout } from 'timers';
+import ItemCard from './ItemCard.vue';
 
 export default {
   components: {

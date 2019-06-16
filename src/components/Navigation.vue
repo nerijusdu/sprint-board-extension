@@ -1,14 +1,13 @@
 <template>
   <div class="nav-container">
-    <router-link to="/board" :class="['nav-item', { active: $route.path === '/board' }]">Board</router-link>
-    <router-link to="/settings" :class="['nav-item', { active: $route.path === '/settings' }]">Settings</router-link>
+    <router-link to="/board" :class="['nav-item', { active: $route.path === '/board' }]">
+      Board
+    </router-link>
+    <router-link to="/settings" :class="['nav-item', { active: $route.path === '/settings' }]">
+      Settings
+    </router-link>
   </div>
 </template>
-
-<script>
-export default {
-};
-</script>
 
 <style scoped>
 .nav-container {
