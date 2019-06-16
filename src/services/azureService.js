@@ -16,11 +16,9 @@ export default class AzureService {
     this.refreshToken = '';
     this.expiresIn = moment();
     this.onAuthorized = () => store.dispatch('authorizeApp');
-
-    this.initData();
   }
 
-  initData() {
+  async initData() {
     const accessToken = window.localStorage.getItem('accessToken');
     if (accessToken) {
       this.accessToken = accessToken;
@@ -36,7 +34,7 @@ export default class AzureService {
     const callbackData = window.localStorage.getItem('callbackData');
     if (callbackData) {
       window.localStorage.removeItem('callbackData');
-      this.handleCallback(callbackData);
+      await this.handleCallback(callbackData);
     }
   }
 

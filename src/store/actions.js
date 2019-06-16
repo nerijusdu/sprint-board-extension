@@ -5,9 +5,9 @@ import store from './index';
 let boardService = null;
 
 export default {
-  init({ dispatch }) {
+  async init({ dispatch }) {
     boardService = new BoardService(store);
-    dispatch('loadSettingsFromMemory');
+    await dispatch('loadSettingsFromMemory');
   },
   addLoader({ commit }) {
     commit('updateLoading', 1);

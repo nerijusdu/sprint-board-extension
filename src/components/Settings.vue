@@ -109,7 +109,6 @@ import AzureService from '../services/azureService';
 
 export default {
   data: () => ({
-    authUrl: AzureService.authUrl,
     model: {
       organization: '',
       project: '',
@@ -148,11 +147,12 @@ export default {
     authorize() {
       if (!this.hasAzureSettings) {
         this.showError('Save settings before authorizing.');
+        return;
       }
-    }
-  },
-  watch: {
-    settings(value) {
+
+      window.location.href = AzureService.authUrl;
+    },
+    updateModel(value) {
       this.model.organization = value.organization;
       this.model.project = value.project;
       this.model.team = value.team;
@@ -160,6 +160,14 @@ export default {
       this.model.devTitles = value.devTitles;
       this.model.codeReviewTitles = value.codeReviewTitles;
       this.model.testingTitles = value.testingTitles;
+    }
+  },
+  mounted() {
+    this.updateModel(this.settings);
+  },
+  watch: {
+    settings(value) {
+      this.updateModel(value);
     }
   }
 };

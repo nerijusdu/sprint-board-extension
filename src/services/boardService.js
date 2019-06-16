@@ -13,21 +13,22 @@ export default class BoardService {
     this.azureService = null;
     this.error = content => storeObj.dispatch('showError', content);
 
-    storeObj.subscribe((mutation, state) => {
+    storeObj.subscribe(async (mutation, state) => {
       if (mutation.type === 'updateSettings') {
-        this.onSettingsUpdated(storeObj, state.settings);
+        await this.onSettingsUpdated(storeObj, state.settings);
         storeObj.dispatch('reloadBoardData');
       }
     });
   }
 
-  onSettingsUpdated(store, settings) {
+  async onSettingsUpdated(store, settings) {
     this.azureService = new AzureService(
       store,
       settings.organization,
       settings.project,
       settings.team
     );
+    await this.azureService.initData();
 
     this.devTitles = settings.devTitles
       .split(',')

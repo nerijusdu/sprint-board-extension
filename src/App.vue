@@ -21,8 +21,8 @@ export default {
     Navigation
   },
   methods: mapActions(['init']),
-  mounted() {
-    this.init();
+  async mounted() {
+    await this.init();
   }
 };
 </script>
