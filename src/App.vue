@@ -4,6 +4,7 @@
     <router-view />
     <loader />
     <message />
+    <refresh />
   </div>
 </template>
 
@@ -12,10 +13,12 @@ import { mapActions } from 'vuex';
 import Loader from './components/Loader.vue';
 import Navigation from './components/Navigation.vue';
 import Message from './components/Message.vue';
+import Refresh from './components/Refresh.vue';
 
 export default {
   name: 'app',
   components: {
+    Refresh,
     Message,
     Loader,
     Navigation
