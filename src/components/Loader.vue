@@ -1,6 +1,8 @@
 <template>
-  <div class="container" v-show="isLoading">
-    <div class="loader" />
+  <div class="loader-container" v-show="isLoading">
+    <div class="loader-sub-container">
+      <div class="loader" />
+    </div>
   </div>
 </template>
 
@@ -15,24 +17,33 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  width: 100vw;
+.loader-container {
   height: 100vh;
-  position: absolute;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-self: center;
+  position: fixed;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 100;
+}
+
+.loader-sub-container {
+  background-color: #f9fbfc;
+  padding: 15px;
+  border-radius: 100px;
+  border: 2px solid #e7e9eb;
 }
 
 .loader,
 .loader:after {
   border-radius: 50%;
-  width: 10em;
-  height: 10em;
+  width: 100px;
+  height: 100px;
   margin: 10px;
 }
 .loader {
-  /* margin: 60px auto; */
   font-size: 10px;
   position: relative;
   border-top: 1.1em solid rgba(255, 255, 255, 0.2);
