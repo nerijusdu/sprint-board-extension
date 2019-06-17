@@ -69,7 +69,7 @@ export default class BoardService {
         if (development) {
           if (development.fields['System.State'].toLowerCase() === 'done') {
             newTask.status = Status.CodeReview;
-          } else {
+          } else if (development.fields['System.State'].toLowerCase() === 'in progress') {
             newTask.status = Status.Development;
           }
         }
