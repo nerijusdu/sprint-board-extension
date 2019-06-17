@@ -1,7 +1,7 @@
-import moment from 'moment';
 import qs from 'querystring';
 import api from './api';
 import secretConfig from '../config.secret.json';
+import dateHelper from '../helpers/dateHelper';
 
 export default class AuthService {
   static callbackUrl = `${secretConfig.url}/callback.html`;
@@ -21,12 +21,8 @@ export default class AuthService {
     this.code = '';
     this.accessToken = '';
     this.refreshToken = '';
-    this.expiresIn = moment();
+    this.expiresIn = dateHelper.now();
     this.onAuthorized = () => store.dispatch('authorizeApp');
-    setTimeout(() => {
-      this.accessToken = 'invalid-token';
-      this.expiresIn = moment();
-    }, 5000);
   }
 
   async initData() {
@@ -34,7 +30,7 @@ export default class AuthService {
     if (accessToken) {
       this.accessToken = accessToken;
       this.refreshToken = window.localStorage.getItem('refreshToken');
-      this.expiresIn = moment(window.localStorage.getItem('expiresIn'));
+      this.expiresIn = new Date(window.localStorage.getItem('expiresIn'));
 
       await this.checkTokenExpiration();
       return;
@@ -48,7 +44,7 @@ export default class AuthService {
   }
 
   async checkTokenExpiration() {
-    if (this.expiresIn.isBefore(moment())) {
+    if (dateHelper.isBefore(this.expiresIn, dateHelper.now())) {
       await this.refreshAccessToken();
     }
   }
@@ -115,7 +111,10 @@ export default class AuthService {
   saveTokenResponse(result) {
     this.accessToken = result.data.access_token;
     this.refreshToken = result.data.refresh_token;
-    this.expiresIn = moment().add(result.data.expires_in, 'seconds');
+    this.expiresIn = dateHelper.addSeconds(
+      dateHelper.now(),
+      result.data.expires_in
+    );
 
     window.localStorage.setItem('accessToken', this.accessToken);
     window.localStorage.setItem('refreshToken', this.refreshToken);
