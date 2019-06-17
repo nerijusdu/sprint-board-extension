@@ -38,41 +38,17 @@ export default class AzureService extends AuthService {
 
     const pbiIds = itemReferences
       .filter(x => !x.rel)
-      .map(x => x.target.id)
-      .join();
+      .map(x => x.target.id);
 
     const subtaskIds = itemReferences
       .filter(x => !!x.rel)
-      .map(x => x.target.id)
-      .join();
+      .map(x => x.target.id);
 
-    const tasksResult = await api.get({
-      url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
-      params: {
-        ids: pbiIds,
-        'api-version': this.apiVersion,
-      },
-      headers: this.authHeader
-    });
+    const tasksResult = await this.batchGetWorkItemDetails(pbiIds);
 
-    if (!tasksResult) {
-      return null;
-    }
+    const subtasksResult = await this.batchGetWorkItemDetails(subtaskIds);
 
-    const subtasksResult = await api.get({
-      url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
-      params: {
-        ids: subtaskIds,
-        'api-version': this.apiVersion,
-      },
-      headers: this.authHeader
-    });
-
-    if (!subtasksResult) {
-      return null;
-    }
-
-    return tasksResult.data.value.map((task) => {
+    return tasksResult.map((task) => {
       const subIds = itemReferences
         .filter(x => x.source && x.source.id === task.id)
         .map(x => x.target.id);
@@ -80,9 +56,41 @@ export default class AzureService extends AuthService {
       return {
         ...task,
         link: this.getItemLink(task.id),
-        subtasks: subtasksResult.data.value.filter(x => subIds.includes(x.id))
+        subtasks: subtasksResult.filter(x => subIds.includes(x.id))
       };
     });
+  }
+
+  async batchGetWorkItemDetails(ids) {
+    const size = 200;
+    const batches = [];
+    if (ids.length > size) {
+      const count = Math.ceil(ids.length / size);
+      for (let i = 0; i < count; i += 1) {
+        batches[i] = ids.slice(i * size, (i + 1) * size);
+      }
+    } else {
+      batches[0] = ids;
+    }
+
+    let result = [];
+    const promises = batches.map(async (b) => {
+      const batchResult = await api.get({
+        url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
+        params: {
+          ids: b.join(),
+          'api-version': this.apiVersion,
+        },
+        headers: this.authHeader
+      });
+
+      if (batchResult) {
+        result = result.concat(batchResult.data.value);
+      }
+    });
+
+    await Promise.all(promises);
+    return result;
   }
 
   async getCurrentIteration() {
