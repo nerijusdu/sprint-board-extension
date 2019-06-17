@@ -1,114 +1,23 @@
-import qs from 'querystring';
-import moment from 'moment';
+import AuthService from './authService';
 import api from './api';
-import secretConfig from '../config.secret.json';
 
-export default class AzureService {
-  static callbackUrl = `${secretConfig.url}/callback.html`;
-
+export default class AzureService extends AuthService {
   constructor(store, organization, project, team) {
+    super(store, organization, project, team);
+
     this.organization = organization;
     this.project = project;
     this.team = team;
     this.apiVersion = '5.0';
-    this.code = '';
-    this.accessToken = '';
-    this.refreshToken = '';
-    this.expiresIn = moment();
-    this.onAuthorized = () => store.dispatch('authorizeApp');
   }
 
-  async initData() {
-    const accessToken = window.localStorage.getItem('accessToken');
-    if (accessToken) {
-      this.accessToken = accessToken;
-      this.refreshToken = window.localStorage.getItem('refreshToken');
-      this.expiresIn = moment(window.localStorage.getItem('expiresIn'));
-
-      if (this.expiresIn.isBefore(moment())) {
-        this.refreshAccessToken();
-      }
-      return;
-    }
-
-    const callbackData = window.localStorage.getItem('callbackData');
-    if (callbackData) {
-      window.localStorage.removeItem('callbackData');
-      await this.handleCallback(callbackData);
-    }
-  }
-
-  static get authUrl() {
-    const params = {
-      client_id: secretConfig.clientId,
-      response_type: 'Assertion',
-      state: 'none',
-      scope: 'vso.code vso.project vso.work',
-      redirect_uri: AzureService.callbackUrl,
-    };
-    return `https://app.vssps.visualstudio.com/oauth2/authorize?${qs.stringify(params)}`;
-  }
-
-  get authHeader() {
-    return { Authorization: `Bearer ${this.accessToken}` };
-  }
-
-  async refreshAccessToken() {
-    const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'refresh_token',
-        assertion: this.refreshToken,
-        redirect_uri: AzureService.callbackUrl
-      })
-    });
-
-    if (!result) {
-      return;
-    }
-
-    this.saveTokenResponse(result);
-  }
-
-  async handleCallback(data) {
-    const urlParams = new URLSearchParams(data);
-    if (urlParams.has('code')) {
-      this.code = urlParams.get('code');
-      this.onAuthorized();
-    }
-
-    await this.getAccessToken();
-  }
-
-  async getAccessToken() {
-    const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: this.code,
-        redirect_uri: AzureService.callbackUrl
-      })
-    });
-
-    if (!result) {
-      return;
-    }
-
-    this.code = '';
-    this.saveTokenResponse(result);
+  getItemLink(id) {
+    return `https://${this.organization}.visualstudio.com/${this.project}/_workitems/edit/${id}`;
   }
 
   async getIterationWorkItems(iterationId) {
+    await this.checkTokenExpiration();
+
     const result = await api.get({
       url: `https://dev.azure.com/${this.organization}/${this.project}/${this.team}/_apis/work/teamsettings/iterations/${iterationId}/workitems`,
       params: {
@@ -125,55 +34,68 @@ export default class AzureService {
   }
 
   async getWorkItemDetails(itemReferences) {
+    await this.checkTokenExpiration();
+
     const pbiIds = itemReferences
       .filter(x => !x.rel)
-      .map(x => x.target.id)
-      .join();
+      .map(x => x.target.id);
 
     const subtaskIds = itemReferences
       .filter(x => !!x.rel)
-      .map(x => x.target.id)
-      .join();
+      .map(x => x.target.id);
 
-    const tasksResult = await api.get({
-      url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
-      params: {
-        ids: pbiIds,
-        'api-version': this.apiVersion,
-      },
-      headers: this.authHeader
-    });
+    const tasksResult = await this.batchGetWorkItemDetails(pbiIds);
 
-    if (!tasksResult) {
-      return null;
-    }
+    const subtasksResult = await this.batchGetWorkItemDetails(subtaskIds);
 
-    const subtasksResult = await api.get({
-      url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
-      params: {
-        ids: subtaskIds,
-        'api-version': this.apiVersion,
-      },
-      headers: this.authHeader
-    });
-
-    if (!subtasksResult) {
-      return null;
-    }
-
-    return tasksResult.data.value.map((task) => {
+    return tasksResult.map((task) => {
       const subIds = itemReferences
         .filter(x => x.source && x.source.id === task.id)
         .map(x => x.target.id);
 
       return {
         ...task,
-        subtasks: subtasksResult.data.value.filter(x => subIds.includes(x.id))
+        link: this.getItemLink(task.id),
+        subtasks: subtasksResult.filter(x => subIds.includes(x.id))
       };
     });
   }
 
+  async batchGetWorkItemDetails(ids) {
+    const size = 200;
+    const batches = [];
+    if (ids.length > size) {
+      const count = Math.ceil(ids.length / size);
+      for (let i = 0; i < count; i += 1) {
+        batches[i] = ids.slice(i * size, (i + 1) * size);
+      }
+    } else {
+      batches[0] = ids;
+    }
+
+    let result = [];
+    const promises = batches.map(async (b) => {
+      const batchResult = await api.get({
+        url: `https://dev.azure.com/${this.organization}/${this.project}/_apis/wit/workitems`,
+        params: {
+          ids: b.join(),
+          'api-version': this.apiVersion,
+        },
+        headers: this.authHeader
+      });
+
+      if (batchResult) {
+        result = result.concat(batchResult.data.value);
+      }
+    });
+
+    await Promise.all(promises);
+    return result;
+  }
+
   async getCurrentIteration() {
+    await this.checkTokenExpiration();
+
     const result = await api.get({
       url: `https://dev.azure.com/${this.organization}/${this.project}/${this.team}/_apis/work/teamsettings/iterations`,
       params: {
@@ -188,15 +110,5 @@ export default class AzureService {
     }
 
     return result.data.value[0];
-  }
-
-  saveTokenResponse(result) {
-    this.accessToken = result.data.access_token;
-    this.refreshToken = result.data.refresh_token;
-    this.expiresIn = moment().add(result.data.expires_in, 'seconds');
-
-    window.localStorage.setItem('accessToken', this.accessToken);
-    window.localStorage.setItem('refreshToken', this.refreshToken);
-    window.localStorage.setItem('expiresIn', this.expiresIn.toISOString());
   }
 }

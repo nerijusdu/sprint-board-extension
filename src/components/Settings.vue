@@ -48,7 +48,9 @@
       <div class="settings-column">
         <h3 class="column-title">App settings</h3>
         <div class="form-field">
-          <label class="label-input" for="refreshTime">Refresh every X minutes</label>
+          <label class="label-input" for="refreshTime">
+            Refresh every X minutes (0 - do not refresh)
+          </label>
           <input
             v-model="model.refreshTime"
             id="refreshTime"
@@ -118,7 +120,7 @@
 
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import AzureService from '../services/azureService';
+import AuthService from '../services/authService';
 
 export default {
   data: () => ({
@@ -164,7 +166,7 @@ export default {
         return;
       }
 
-      window.location.href = AzureService.authUrl;
+      window.location.href = AuthService.authUrl;
     },
     updateModel(value) {
       this.model.organization = value.organization;

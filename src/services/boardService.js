@@ -50,7 +50,10 @@ export default class BoardService {
       .map((task) => {
         const newTask = {
           ...task,
-          status: Status.Todo
+          status: Status.Todo,
+          assignee: task.fields['System.AssignedTo']
+            ? task.fields['System.AssignedTo'].displayName
+            : 'Unassigned'
         };
 
         if (this.doneTitles.includes(task.fields['System.State'].toLowerCase())) {
@@ -69,12 +72,21 @@ export default class BoardService {
         if (development) {
           if (development.fields['System.State'].toLowerCase() === 'done') {
             newTask.status = Status.CodeReview;
-          } else {
+            if (codeReview && codeReview.fields['System.AssignedTo']) {
+              newTask.assignee = codeReview.fields['System.AssignedTo'].displayName;
+            }
+          } else if (development.fields['System.State'].toLowerCase() === 'in progress') {
             newTask.status = Status.Development;
+            if (development && development.fields['System.AssignedTo']) {
+              newTask.assignee = development.fields['System.AssignedTo'].displayName;
+            }
           }
         }
         if (codeReview && codeReview.fields['System.State'].toLowerCase() === 'done') {
           newTask.status = Status.Testing;
+          if (testing && testing.fields['System.AssignedTo']) {
+            newTask.assignee = testing.fields['System.AssignedTo'].displayName;
+          }
         }
         if (!testing || testing.fields['System.State'].toLowerCase() === 'done') {
           newTask.status = Status.Done;
@@ -102,6 +114,7 @@ export default class BoardService {
       };
     } catch (e) {
       this.error('Error while fetching data.');
+      console.warn(e);
 
       return {
         todo: [],
