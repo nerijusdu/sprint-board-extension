@@ -11,6 +11,10 @@ export default class AzureService extends AuthService {
     this.apiVersion = '5.0';
   }
 
+  getItemLink(id) {
+    return `https://${this.organization}.visualstudio.com/${this.project}/_workitems/edit/${id}`;
+  }
+
   async getIterationWorkItems(iterationId) {
     await this.checkTokenExpiration();
 
@@ -75,6 +79,7 @@ export default class AzureService extends AuthService {
 
       return {
         ...task,
+        link: this.getItemLink(task.id),
         subtasks: subtasksResult.data.value.filter(x => subIds.includes(x.id))
       };
     });

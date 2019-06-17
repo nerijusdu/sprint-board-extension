@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!!item" class="card-container">
+  <a v-if="!!item" class="card-container" :href="item.link" draggable="false">
     <div :class="['sub-container', itemType]">
       <div class="title">
         <span class="task-number">{{ item.id }}</span>
@@ -9,13 +9,13 @@
         <div v-show="item.fields['Microsoft.VSTS.Scheduling.Effort']">
           Effort: <b>{{ item.fields['Microsoft.VSTS.Scheduling.Effort'] }}</b>
         </div>
-        <div>{{ assignee }}</div>
+        <div>{{ item.assignee }}</div>
         <div class="tags">
           <div v-for="tag in tags" :key="tag">{{ tag }}</div>
         </div>
       </div>
     </div>
-  </div>
+  </a>
 </template>
 
 <script>
@@ -33,11 +33,6 @@ export default {
         case 'Bug': return 'bug';
         default: return '';
       }
-    },
-    assignee() {
-      return this.item.fields['System.AssignedTo']
-        ? this.item.fields['System.AssignedTo'].displayName
-        : 'Unassigned';
     },
     tags() {
       return (this.item.fields['System.Tags'] || '')
@@ -59,6 +54,8 @@ export default {
   align-self: stretch;
   justify-self: flex-start;
   text-align: justify;
+  text-decoration: none;
+  color: black;
 }
 
 .sub-container {
