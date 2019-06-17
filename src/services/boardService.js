@@ -114,6 +114,7 @@ export default class BoardService {
       };
     } catch (e) {
       this.error('Error while fetching data.');
+      // eslint-disable-next-line no-console
       console.warn(e);
 
       return {

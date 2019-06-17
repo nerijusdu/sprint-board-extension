@@ -55,24 +55,18 @@ export default class AuthService {
 
   async refreshAccessToken() {
     const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'refresh_token',
-        assertion: this.refreshToken,
-        redirect_uri: AuthService.callbackUrl
-      })
+      url: `${secretConfig.authUrl}/RefreshAccessToken`,
+      data: {
+        refreshToken: this.refreshToken,
+        callbackUrl: AuthService.callbackUrl
+      }
     });
 
-    if (!result) {
+    if (!result || !result.data.success) {
       return;
     }
 
-    this.saveTokenResponse(result);
+    this.saveTokenResponse(result.data);
   }
 
   async handleCallback(data) {
@@ -87,25 +81,19 @@ export default class AuthService {
 
   async getAccessToken() {
     const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: this.code,
-        redirect_uri: AuthService.callbackUrl
-      })
+      url: `${secretConfig.authUrl}/GetAccessToken`,
+      data: {
+        code: this.code,
+        callbackUrl: AuthService.callbackUrl
+      }
     });
 
-    if (!result) {
+    if (!result || !result.data.success) {
       return;
     }
 
     this.code = '';
-    this.saveTokenResponse(result);
+    this.saveTokenResponse(result.data);
   }
 
   saveTokenResponse(result) {
@@ -113,7 +101,7 @@ export default class AuthService {
     this.refreshToken = result.data.refresh_token;
     this.expiresIn = dateHelper.addSeconds(
       dateHelper.now(),
-      result.data.expires_in
+      parseInt(result.data.expires_in, 10)
     );
 
     window.localStorage.setItem('accessToken', this.accessToken);

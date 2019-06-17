@@ -84,7 +84,7 @@ export default class AzureService extends AuthService {
         headers: this.authHeader
       });
 
-      if (batchResult) {
+      if (batchResult && batchResult.data.value) {
         result = result.concat(batchResult.data.value);
       }
     });
@@ -105,7 +105,7 @@ export default class AzureService extends AuthService {
       headers: this.authHeader
     });
 
-    if (!result) {
+    if (!result || !result.data.value) {
       return null;
     }
 
