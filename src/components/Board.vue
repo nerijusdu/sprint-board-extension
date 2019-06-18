@@ -60,6 +60,7 @@ export default {
 .board-sub-container {
   display: flex;
   width: 100%;
+  justify-content: center;
 }
 
 .column {

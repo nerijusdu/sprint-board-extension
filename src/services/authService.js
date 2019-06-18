@@ -26,6 +26,13 @@ export default class AuthService {
   }
 
   async initData() {
+    const callbackData = window.localStorage.getItem('callbackData');
+    if (callbackData) {
+      window.localStorage.removeItem('callbackData');
+      await this.handleCallback(callbackData);
+      return;
+    }
+
     const accessToken = window.localStorage.getItem('accessToken');
     if (accessToken) {
       this.accessToken = accessToken;
@@ -33,13 +40,6 @@ export default class AuthService {
       this.expiresIn = new Date(window.localStorage.getItem('expiresIn'));
 
       await this.checkTokenExpiration();
-      return;
-    }
-
-    const callbackData = window.localStorage.getItem('callbackData');
-    if (callbackData) {
-      window.localStorage.removeItem('callbackData');
-      await this.handleCallback(callbackData);
     }
   }
 
