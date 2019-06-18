@@ -1,5 +1,8 @@
 <template>
-  <div :class="['refresh-button', { disabled: isLoading || !hasAzureSettings || !IsAccessGranted }]" @click="refresh">
+  <div
+    :class="['refresh-button', { disabled: isLoading || !hasAzureSettings || !IsAccessGranted }]"
+    @click="refresh"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"

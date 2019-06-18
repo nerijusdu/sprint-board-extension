@@ -31,6 +31,7 @@ const handleRequest = (method, hasData) => async (userConfig) => {
     if (e.response && e.response.status === 401 && window.localStorage.getItem('appAuthorized')) {
       invalidateToken();
     }
+    // eslint-disable-next-line no-console
     console.warn(e);
     return null;
   }
