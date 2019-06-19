@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="['refresh-button', { disabled: isLoading || !hasAzureSettings || !IsAccessGranted }]"
+    :class="['refresh-button', { disabled: isLoading || !hasAzureSettings || !isAccessGranted }]"
     @click="refresh"
   >
     <svg
@@ -28,12 +28,12 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 export default {
   computed: {
     ...mapGetters(['isLoading', 'hasAzureSettings']),
-    ...mapState(['IsAccessGranted'])
+    ...mapState(['isAccessGranted'])
   },
   methods: {
     ...mapActions(['reloadBoardData']),
     refresh() {
-      if (!this.isLoading && this.IsAccessGranted && this.hasAzureSettings) {
+      if (!this.isLoading && this.isAccessGranted && this.hasAzureSettings) {
         this.reloadBoardData();
       }
     }

@@ -1,12 +1,5 @@
 import axios from 'axios';
-
-const invalidateToken = () => {
-  window.localStorage.removeItem('appAuthorized');
-  window.localStorage.removeItem('accessToken');
-  window.localStorage.removeItem('refreshToken');
-  window.localStorage.removeItem('expiresIn');
-  document.location.href = '/settings';
-};
+import AuthService from './authService';
 
 const handleRequest = (method, hasData) => async (userConfig) => {
   const config = userConfig || {};
@@ -23,13 +16,13 @@ const handleRequest = (method, hasData) => async (userConfig) => {
     }
 
     if (res && res.status === 203 && window.localStorage.getItem('appAuthorized')) {
-      invalidateToken();
+      AuthService.clearUserSession();
     }
 
     return res;
   } catch (e) {
     if (e.response && e.response.status === 401 && window.localStorage.getItem('appAuthorized')) {
-      invalidateToken();
+      AuthService.clearUserSession();
     }
     // eslint-disable-next-line no-console
     console.warn(e);

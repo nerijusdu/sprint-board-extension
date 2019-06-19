@@ -17,12 +17,22 @@ export default class AuthService {
     return `https://app.vssps.visualstudio.com/oauth2/authorize?${qs.stringify(params)}`;
   }
 
+  static clearUserSession() {
+    window.localStorage.removeItem('appAuthorized');
+    window.localStorage.removeItem('accessToken');
+    window.localStorage.removeItem('refreshToken');
+    window.localStorage.removeItem('expiresIn');
+    document.location.href = '/';
+  }
+
   constructor(store) {
     this.code = '';
     this.accessToken = '';
     this.refreshToken = '';
     this.expiresIn = dateHelper.now();
     this.onAuthorized = () => store.dispatch('authorizeApp');
+    this.startLoad = () => store.dispatch('addLoader');
+    this.endLoad = () => store.dispatch('removeLoader');
   }
 
   async initData() {
@@ -54,6 +64,7 @@ export default class AuthService {
   }
 
   async refreshAccessToken() {
+    this.startLoad();
     const result = await api.post({
       url: `${secretConfig.authUrl}/RefreshAccessToken`,
       data: {
@@ -61,6 +72,7 @@ export default class AuthService {
         callbackUrl: AuthService.callbackUrl
       }
     });
+    this.endLoad();
 
     if (!result || !result.data.success) {
       return;
@@ -80,6 +92,7 @@ export default class AuthService {
   }
 
   async getAccessToken() {
+    this.startLoad();
     const result = await api.post({
       url: `${secretConfig.authUrl}/GetAccessToken`,
       data: {
@@ -87,6 +100,7 @@ export default class AuthService {
         callbackUrl: AuthService.callbackUrl
       }
     });
+    this.endLoad();
 
     if (!result || !result.data.success) {
       return;
