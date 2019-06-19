@@ -17,15 +17,32 @@ export default class AuthService {
     return `https://app.vssps.visualstudio.com/oauth2/authorize?${qs.stringify(params)}`;
   }
 
+  static clearUserSession() {
+    window.localStorage.removeItem('appAuthorized');
+    window.localStorage.removeItem('accessToken');
+    window.localStorage.removeItem('refreshToken');
+    window.localStorage.removeItem('expiresIn');
+    document.location.href = '/';
+  }
+
   constructor(store) {
     this.code = '';
     this.accessToken = '';
     this.refreshToken = '';
     this.expiresIn = dateHelper.now();
     this.onAuthorized = () => store.dispatch('authorizeApp');
+    this.startLoad = () => store.dispatch('addLoader');
+    this.endLoad = () => store.dispatch('removeLoader');
   }
 
   async initData() {
+    const callbackData = window.localStorage.getItem('callbackData');
+    if (callbackData) {
+      window.localStorage.removeItem('callbackData');
+      await this.handleCallback(callbackData);
+      return;
+    }
+
     const accessToken = window.localStorage.getItem('accessToken');
     if (accessToken) {
       this.accessToken = accessToken;
@@ -33,13 +50,6 @@ export default class AuthService {
       this.expiresIn = new Date(window.localStorage.getItem('expiresIn'));
 
       await this.checkTokenExpiration();
-      return;
-    }
-
-    const callbackData = window.localStorage.getItem('callbackData');
-    if (callbackData) {
-      window.localStorage.removeItem('callbackData');
-      await this.handleCallback(callbackData);
     }
   }
 
@@ -54,25 +64,21 @@ export default class AuthService {
   }
 
   async refreshAccessToken() {
+    this.startLoad();
     const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'refresh_token',
-        assertion: this.refreshToken,
-        redirect_uri: AuthService.callbackUrl
-      })
+      url: `${secretConfig.authUrl}/RefreshAccessToken`,
+      data: {
+        refreshToken: this.refreshToken,
+        callbackUrl: AuthService.callbackUrl
+      }
     });
+    this.endLoad();
 
-    if (!result) {
+    if (!result || !result.data.success) {
       return;
     }
 
-    this.saveTokenResponse(result);
+    this.saveTokenResponse(result.data);
   }
 
   async handleCallback(data) {
@@ -86,26 +92,22 @@ export default class AuthService {
   }
 
   async getAccessToken() {
+    this.startLoad();
     const result = await api.post({
-      url: 'https://app.vssps.visualstudio.com/oauth2/token',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: qs.stringify({
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        client_assertion: secretConfig.appSecret,
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: this.code,
-        redirect_uri: AuthService.callbackUrl
-      })
+      url: `${secretConfig.authUrl}/GetAccessToken`,
+      data: {
+        code: this.code,
+        callbackUrl: AuthService.callbackUrl
+      }
     });
+    this.endLoad();
 
-    if (!result) {
+    if (!result || !result.data.success) {
       return;
     }
 
     this.code = '';
-    this.saveTokenResponse(result);
+    this.saveTokenResponse(result.data);
   }
 
   saveTokenResponse(result) {
@@ -113,7 +115,7 @@ export default class AuthService {
     this.refreshToken = result.data.refresh_token;
     this.expiresIn = dateHelper.addSeconds(
       dateHelper.now(),
-      result.data.expires_in
+      parseInt(result.data.expires_in, 10)
     );
 
     window.localStorage.setItem('accessToken', this.accessToken);

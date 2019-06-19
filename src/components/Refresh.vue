@@ -1,5 +1,8 @@
 <template>
-  <div :class="['refresh-button', { disabled: isLoading }]" @click="refresh">
+  <div
+    :class="['refresh-button', { disabled: isLoading || !hasAzureSettings || !isAccessGranted }]"
+    @click="refresh"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -20,14 +23,17 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
-  computed: mapGetters(['isLoading']),
+  computed: {
+    ...mapGetters(['isLoading', 'hasAzureSettings']),
+    ...mapState(['isAccessGranted'])
+  },
   methods: {
     ...mapActions(['reloadBoardData']),
     refresh() {
-      if (!this.isLoading) {
+      if (!this.isLoading && this.isAccessGranted && this.hasAzureSettings) {
         this.reloadBoardData();
       }
     }
@@ -47,7 +53,7 @@ export default {
 }
 
 .refresh-button.disabled {
-  cursor: wait;
+  cursor: default;
   background-color: #e7e9eb;
 }
 

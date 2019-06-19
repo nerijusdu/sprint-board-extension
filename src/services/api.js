@@ -1,4 +1,5 @@
 import axios from 'axios';
+import AuthService from './authService';
 
 const handleRequest = (method, hasData) => async (userConfig) => {
   const config = userConfig || {};
@@ -14,15 +15,16 @@ const handleRequest = (method, hasData) => async (userConfig) => {
       res = await method(config.url, config);
     }
 
+    if (res && res.status === 203 && window.localStorage.getItem('appAuthorized')) {
+      AuthService.clearUserSession();
+    }
+
     return res;
   } catch (e) {
-    if (e.response.status === 401 && window.localStorage.getItem('appAuthorized')) { // 401
-      window.localStorage.removeItem('appAuthorized');
-      window.localStorage.removeItem('accessToken');
-      window.localStorage.removeItem('refreshToken');
-      window.localStorage.removeItem('expiresIn');
-      document.location.href = '/settings';
+    if (e.response && e.response.status === 401 && window.localStorage.getItem('appAuthorized')) {
+      AuthService.clearUserSession();
     }
+    // eslint-disable-next-line no-console
     console.warn(e);
     return null;
   }

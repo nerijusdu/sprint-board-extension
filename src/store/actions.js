@@ -1,5 +1,4 @@
 import BoardService from '../services/boardService';
-// eslint-disable-next-line import/no-cycle
 import store from './index';
 
 let boardService = null;

@@ -1,19 +1,41 @@
 <template>
   <div class="nav-container">
-    <router-link to="/board" :class="['nav-item', { active: $route.path === '/board' }]">
-      Board
-    </router-link>
-    <router-link to="/settings" :class="['nav-item', { active: $route.path === '/settings' }]">
-      Settings
-    </router-link>
+    <div class="nav-sub-container">
+      <router-link to="/board" :class="['nav-item', { active: $route.path === '/board' }]">
+        Board
+      </router-link>
+      <router-link to="/settings" :class="['nav-item', { active: $route.path === '/settings' }]">
+        Settings
+      </router-link>
+    </div>
+    <div class="nav-sub-container">
+      <div class="nav-item" @click="logout">Logout</div>
+    </div>
   </div>
 </template>
+
+<script>
+import AuthService from '../services/authService';
+
+export default {
+  methods: {
+    logout: () => AuthService.clearUserSession()
+  }
+};
+</script>
+
 
 <style scoped>
 .nav-container {
   background-color: #171c26;
   color: white;
   height: 50px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.nav-sub-container {
   display: flex;
   align-items: stretch;
   justify-content: center;

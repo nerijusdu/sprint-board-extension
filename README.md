@@ -11,12 +11,13 @@ npm install
     - Work items (read)
     - Code (read) - currently not used, save for future
     - Project and team (read) - currently not used, save for future
+- Setup [backend auth service](https://github.com/nerijusdu/sprint-board-extension-auth)
 - Add `src/config.secret.json` with the following structure:
 ```
 {
   "url": "App URL",
   "clientId": "App ID",
-  "appSecret": "Client Secret"
+  "authUrl": "backend auth service url"
 }
 ```
 
