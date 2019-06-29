@@ -1,4 +1,20 @@
 # sprint-board-extension
+![Screenshot](https://raw.githubusercontent.com/nerijusdu/sprint-board-extension/master/sprint-board-extension.png)
+
+This is a simple sprint board similar to JIRA. It takes all data from Azure DevOps and presents it in a more comfortable view.
+The workflow for AzureDevOps:
+- Create Tasks for PBIs (names can be configured):
+  - Development
+  - Code review
+  - Testing
+- Change created task state (Todo, In progress, done)
+
+The board will show 5 columns with tasks from azure board:
+- To Do
+- Development
+- Code review
+- Testing
+- Done
 
 ## Project setup
 ```
